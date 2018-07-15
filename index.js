@@ -7,6 +7,8 @@ import FourOhFour from './src/views/FourOhFour'
 
 const mapStateToProps = (state) => ({ browserHistory: state.browserHistory })
 
+console.log(`help I'm trapped in the console!`)
+
 const AppRouter = connect(mapStateToProps)(({ browserHistory }) => (
   <Router history={browserHistory}>
     <Switch>
