@@ -5,8 +5,45 @@
 }
 
 .title {
+  padding: 10px;
+  background-color: white;
+  border: 2px solid black;
+  width: 300px;
+  margin: 10px;
+  align-self: center;
+  border-radius: 10px;
+  cursor: pointer;
   font-size: 24px;
+  font-family: Sans-Serif;
+  -webkit-user-select: none;       
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  text-align: center;
 }
+
+.titleSelected {
+  padding: 10px;
+  background-color: #dcfffe;
+  border: 2px solid black;
+  width: 300px;
+  margin: 10px;
+  align-self: center;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 24px;
+  font-family: Sans-Serif;
+  -webkit-user-select: none;       
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  text-align: center;
+}
+
+.title:hover, .titleSelected:hover {
+  background-color: #7cfffb;
+}
+
 
 .subHeader {
   display: flex;
@@ -15,4 +52,8 @@
 
 .subHeader div {
   margin: 10px;
+}
+
+.titles {
+  display: flex;
 }

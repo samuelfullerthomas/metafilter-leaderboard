@@ -7,27 +7,40 @@ import styles from './App.css'
 import 'react-table/react-table.css?raw'
 
 const mapStateToProps = (state) => {
+  const {
+    data,
+    dateRangeCovered,
+    politicalComments,
+    politicalPercentage,
+    totalComments
+  } = state[state.view] || state
   return {
-    data: state.data,
+    view: state.view,
     filters: state.filters,
-    dateRangeCovered: state.dateRangeCovered,
-    politicalComments: state.politicalComments,
-    politicalPercentage: state.politicalPercentage,
-    totalComments: state.totalComments
+    dateRangeCovered,
+    politicalComments,
+    politicalPercentage,
+    totalComments,
+    data
   }
 }
 
 const mapActions = [
   'getInitialState',
   'updateFilters',
-  'getURLFilters'
+  'getURLFilters',
+  'changeSubdomain'
 ]
 
 class App extends Component {
   constructor (props) {
     super(props)
     this.state = {}
-    props.getInitialState()
+    if (!props.match.params.domain) {
+      props.changeSubdomain('www')
+    } else {
+      props.getInitialState()
+    }
     props.getURLFilters()
   }
 
@@ -38,7 +51,9 @@ class App extends Component {
       politicalPercentage,
       dateRangeCovered,
       politicalComments,
-      filters
+      filters,
+      view,
+      changeSubdomain
     } = this.props
     if (!data) {
       return (
@@ -48,7 +63,17 @@ class App extends Component {
     return (
       <div>
         <div className={styles.header}>
-          <div className={styles.title}>Metafilter Leaderboard</div>
+          <div className={styles.titles}>
+            <div className={view === 'www' ? styles.titleSelected : styles.title} onClick={() => changeSubdomain('www')}>
+              Metafilter Leaderboard
+            </div>
+            <div className={view === 'ask' ? styles.titleSelected : styles.title} onClick={() => changeSubdomain('ask')}>
+              AskMetafilter Leaderboard
+            </div>
+            <div className={view === 'metatalk' ? styles.titleSelected : styles.title} onClick={() => changeSubdomain('metatalk')}>
+              Metatalk Leaderboard
+            </div>
+          </div>
           <div className={styles.subHeader}>
             <div>{dateRangeCovered}</div>
             <div>Total comments: {totalComments}</div>
@@ -76,6 +101,7 @@ class App extends Component {
                 {
                   Header: 'Profile link',
                   Filter: this.filter.bind(this),
+                  Cell: row => (<a target='_blank' href={row.value}>{row.value}</a>),
                   accessor: 'href'
                 },
                 {

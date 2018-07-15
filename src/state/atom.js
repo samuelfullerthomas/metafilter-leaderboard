@@ -4,7 +4,7 @@ import actions from './actions'
 import { createBrowserHistory } from 'history'
 const environment = process.env.NODE_ENV
 
-const initialState = { browserHistory: createBrowserHistory(), filters: [] }
+const initialState = { browserHistory: createBrowserHistory(), filters: [], view: 'www' }
 
 module.exports = createAtom(initialState, actions, {
   debug: environment === 'development' ? log : false

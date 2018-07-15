@@ -3,16 +3,29 @@ import { createBrowserHistory } from 'history'
 const isDevelopment = process.env.NODE_ENV === 'development'
 
 export default {
-  getInitialState: async ({ get, set }) => {
+  getInitialState: async ({ get, set }, domain) => {
+    const { browserHistory } = get()
+    domain = domain || browserHistory.location.pathname.slice(1)
     const url = isDevelopment
       ? 'http://localhost:1337'
       : 'https://api.samthomas.io'
-    const response = await axios.get(`${url}/leaderboard/www?posts=600`).catch(e => console.log(e))
-    set(response.data)
+    const viewData = await axios.get(`${url}/leaderboard/${domain}?posts=${domain === 'metatalk' ? 50 : 600}`)
+    set({
+      view: domain,
+      [domain]: viewData.data
+    })
+  },
+  changeSubdomain: ({ get, set, dispatch }, newSubdomain) => {
+    const state = get()
+    state.browserHistory.push({ pathname: `/${newSubdomain}` })
+    if (!state[newSubdomain]) {
+      dispatch('getInitialState', newSubdomain)
+    }
+    set({view: newSubdomain, filters: []})
   },
   returnToHomepage: ({ get }) => {
     const { browserHistory } = get()
-    browserHistory.push({ pathname: '/' })
+    browserHistory.push({ pathname: '/www' })
   },
   updateFilters: ({ get, set }, { filterName, value }) => {
     if (!filterName) return
