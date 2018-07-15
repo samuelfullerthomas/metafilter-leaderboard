@@ -13,8 +13,8 @@ const mapStateToProps = (state) => {
     politicalComments,
     politicalPercentage,
     totalComments
-  } = state[state.view] || state
-  return {
+  } = state[state.view] || {}
+  const mappedState = {
     view: state.view,
     filters: state.filters,
     dateRangeCovered,
@@ -23,6 +23,7 @@ const mapStateToProps = (state) => {
     totalComments,
     data
   }
+  return mappedState
 }
 
 const mapActions = [
@@ -35,13 +36,11 @@ const mapActions = [
 class App extends Component {
   constructor (props) {
     super(props)
-    this.state = {}
-    if (!props.match.params.domain) {
-      props.changeSubdomain('www')
+    if (this.props.match.path === '/') {
+      this.props.changeSubdomain('www')
     } else {
-      props.getInitialState()
+      this.props.getInitialState()
     }
-    props.getURLFilters()
   }
 
   render () {
@@ -191,4 +190,4 @@ class App extends Component {
   }
 }
 
-export default connect(mapStateToProps, mapActions)(App)
+export default connect(mapStateToProps, mapActions, { sync: true, pure: false })(App)

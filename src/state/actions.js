@@ -1,31 +1,40 @@
 import axios from 'axios'
 import { createBrowserHistory } from 'history'
+import isAfter from 'date-fns/is_after'
+import addHours from 'date-fns/add_hours'
+import { isEmpty } from 'lodash-es'
 const isDevelopment = process.env.NODE_ENV === 'development'
 
 export default {
   getInitialState: async ({ get, set }, domain) => {
-    const { browserHistory } = get()
-    domain = domain || browserHistory.location.pathname.slice(1)
-    const url = isDevelopment
-      ? 'http://localhost:1337'
-      : 'https://api.samthomas.io'
-    const viewData = await axios.get(`${url}/leaderboard/${domain}?posts=${domain === 'metatalk' ? 50 : 600}`)
-    set({
-      view: domain,
-      [domain]: viewData.data
-    })
+    const state = get()
+    domain = domain || state.browserHistory.location.pathname.slice(1)
+    let cacheExpired = false
+    if (!isEmpty(state[domain]) && state[domain].expires) {
+      cacheExpired = isAfter(new Date(), new Date(state[domain].expires))
+    }
+    if (!state[domain] || isEmpty(state[domain]) || cacheExpired) {
+      const url = isDevelopment
+        ? 'http://localhost:1337'
+        : 'https://api.samthomas.io'
+      const viewData = await axios.get(`${url}/leaderboard/${domain}?posts=${domain === 'metatalk' ? 50 : 600}`)
+      viewData.data.expires = addHours(new Date(), 12)
+      window.localStorage.setItem(domain, JSON.stringify(viewData.data))
+      set({ [domain]: viewData.data })
+    }
   },
   changeSubdomain: ({ get, set, dispatch }, newSubdomain) => {
     const state = get()
     state.browserHistory.push({ pathname: `/${newSubdomain}` })
-    if (!state[newSubdomain]) {
+    if (isEmpty(!state[newSubdomain])) {
       dispatch('getInitialState', newSubdomain)
     }
     set({view: newSubdomain, filters: []})
   },
-  returnToHomepage: ({ get }) => {
+  returnToHomepage: ({ get, set }) => {
     const { browserHistory } = get()
     browserHistory.push({ pathname: '/www' })
+    set({view: 'www', filters: []})
   },
   updateFilters: ({ get, set }, { filterName, value }) => {
     if (!filterName) return
@@ -43,28 +52,5 @@ export default {
       .join('&')
     browserHistory.replace({ pathname: browserHistory.location.pathname, search: `?${filterString}` })
     set({ filters: newFilters })
-  },
-  getURLFilters: ({ get, set }) => {
-    const { browserHistory: { location: { search } } } = get()
-    if (!search) return
-    const filters = search.slice(1).split('&').map(kv => kv.split('=')).map((kvArr) => {
-      return {
-        id: kvArr[0],
-        value: decodeURIComponent(kvArr[1])
-      }
-    }).filter(filter => {
-      return [
-        'name',
-        'href',
-        'userId',
-        'activityRank',
-        'popularityRank',
-        'favoritesPerComment',
-        'totalFavorites',
-        'commentCount',
-        'politicalCommentsPercentage'
-      ].includes(filter.id)
-    })
-    set({ filters })
   }
 }

@@ -12,7 +12,9 @@ console.log(`help I'm trapped in the console!`)
 const AppRouter = connect(mapStateToProps)(({ browserHistory }) => (
   <Router history={browserHistory}>
     <Switch>
-      <Route exact path='/:domain' component={App} />
+      <Route exact path='/www' component={App} />
+      <Route exact path='/ask' component={App} />
+      <Route exact path='/metatalk' component={App} />
       <Route exact path='/' component={App} />
       <Route component={FourOhFour} />
     </Switch>
